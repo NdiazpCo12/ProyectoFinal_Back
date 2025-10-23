@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  api:
+    build: ./api
+    container_name: api
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/backend
+      - REDIS_HOST=redis
+    depends_on:
+      - db
+      - redis
+    command: npm run start:dev
+
+  db:
+    image: postgres:15
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: backend
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
