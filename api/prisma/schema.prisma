@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum ChallengeStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      UserRole @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Challenge {
+  id          String          @id @default(cuid())
+  title       String
+  description String
+  difficulty  Difficulty
+  tags        String[]        // Array de strings para tags
+  timeLimit   Int             // en milisegundos
+  memoryLimit Int             // en MB
+  status      ChallengeStatus @default(DRAFT)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  testCases TestCase[]
+
+  @@map("challenges")
+}
+
+model TestCase {
+  id          String   @id @default(cuid())
+  challengeId String
+  input       String   // entrada del caso de prueba
+  expectedOutput String // salida esperada
+  isHidden    Boolean  @default(false) // casos ocultos para estudiantes
+  createdAt   DateTime @default(now())
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@map("test_cases")
+}
