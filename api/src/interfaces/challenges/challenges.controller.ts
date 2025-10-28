@@ -8,13 +8,13 @@ import {
   Param,
   Query,
   UseGuards,
-  Request,
-  ValidationPipe
+  ValidationPipe,
+  Inject,
 } from '@nestjs/common';
-import type { CreateChallengeUseCase, CreateChallengeResponse } from '../../application/use-cases/create-challenge.usecase';
-import type { GetChallengesUseCase, ChallengeSummary } from '../../application/use-cases/get-challenges.usecase';
-import type { UpdateChallengeUseCase, UpdateChallengeResponse } from '../../application/use-cases/update-challenge.usecase';
-import type { DeleteChallengeUseCase, DeleteChallengeDto } from '../../application/use-cases/delete-challenge.usecase';
+import { CreateChallengeUseCase } from '../../application/use-cases/create-challenge.usecase';
+import { GetChallengesUseCase } from '../../application/use-cases/get-challenges.usecase';
+import { UpdateChallengeUseCase } from '../../application/use-cases/update-challenge.usecase';
+import { DeleteChallengeUseCase } from '../../application/use-cases/delete-challenge.usecase';
 import { JwtAuthGuard } from '../../infrastructure/security/jwt-auth.guard';
 import { AdminGuard } from '../../infrastructure/security/admin.guard';
 import { CreateChallengeDto } from '../dto/create-challenge.dto';
@@ -22,45 +22,49 @@ import { CreateChallengeDto } from '../dto/create-challenge.dto';
 @Controller('challenges')
 export class ChallengesController {
   constructor(
+    @Inject(CreateChallengeUseCase)
     private readonly createChallengeUseCase: CreateChallengeUseCase,
+
+    @Inject(GetChallengesUseCase)
     private readonly getChallengesUseCase: GetChallengesUseCase,
+
+    @Inject(UpdateChallengeUseCase)
     private readonly updateChallengeUseCase: UpdateChallengeUseCase,
+
+    @Inject(DeleteChallengeUseCase)
     private readonly deleteChallengeUseCase: DeleteChallengeUseCase,
   ) {}
 
   @Get()
-  async getChallenges(@Query('status') status?: string): Promise<ChallengeSummary[]> {
+  async getChallenges(@Query('status') status?: string) {
     return this.getChallengesUseCase.execute({ status });
   }
 
   @Get('published')
-  async getPublishedChallenges(): Promise<ChallengeSummary[]> {
+  async getPublishedChallenges() {
     return this.getChallengesUseCase.getPublishedChallenges();
   }
 
   @Get(':id')
-  async getChallengeById(@Param('id') id: string): Promise<ChallengeSummary | null> {
+  async getChallengeById(@Param('id') id: string) {
     return this.getChallengesUseCase.getChallengeById(id);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
-  async createChallenge(@Body(ValidationPipe) createDto: CreateChallengeDto): Promise<CreateChallengeResponse> {
+  async createChallenge(@Body(ValidationPipe) createDto: CreateChallengeDto) {
     return this.createChallengeUseCase.execute(createDto);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Put(':id')
-  async updateChallenge(
-    @Param('id') id: string,
-    @Body() updateDto: any, // TODO: Create UpdateChallengeDto
-  ): Promise<UpdateChallengeResponse> {
+  async updateChallenge(@Param('id') id: string, @Body() updateDto: any) {
     return this.updateChallengeUseCase.execute({ id, ...updateDto });
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete(':id')
-  async deleteChallenge(@Param('id') id: string): Promise<void> {
+  async deleteChallenge(@Param('id') id: string) {
     return this.deleteChallengeUseCase.execute({ id });
   }
 }

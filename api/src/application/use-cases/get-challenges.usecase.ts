@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Challenge } from '../../domain/entities/challenge.entity';
-import type { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
+import { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
 
 export interface GetChallengesDto {
   status?: string;
@@ -22,7 +22,10 @@ export interface ChallengeSummary {
 
 @Injectable()
 export class GetChallengesUseCase {
-  constructor(private readonly challengeRepository: IChallengeRepository) {}
+  constructor(
+  @Inject('IChallengeRepository')
+  private readonly challengeRepository: any,
+) {}
 
   async execute(dto: GetChallengesDto = {}): Promise<ChallengeSummary[]> {
     const { status } = dto;

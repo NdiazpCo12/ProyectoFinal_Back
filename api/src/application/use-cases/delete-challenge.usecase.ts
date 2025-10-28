@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import type { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
 
 export interface DeleteChallengeDto {
   id: string;
@@ -7,18 +7,21 @@ export interface DeleteChallengeDto {
 
 @Injectable()
 export class DeleteChallengeUseCase {
-  constructor(private readonly challengeRepository: IChallengeRepository) {}
+  constructor(
+    @Inject('IChallengeRepository')
+    private readonly challengeRepository: any,
+  ) {}
 
   async execute(deleteDto: DeleteChallengeDto): Promise<void> {
     const { id } = deleteDto;
 
-    // Check if challenge exists
+    // Verificar si el desafío existe
     const existingChallenge = await this.challengeRepository.findById(id);
     if (!existingChallenge) {
       throw new NotFoundException('Challenge not found');
     }
 
-    // Delete challenge (test cases will be deleted automatically due to cascade)
+    // Eliminar el desafío (los test cases se eliminan automáticamente por cascada)
     await this.challengeRepository.delete(id);
   }
 }

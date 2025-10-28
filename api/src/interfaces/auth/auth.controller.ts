@@ -1,6 +1,14 @@
-import { Controller, Post, Body, UseGuards, Request, ValidationPipe } from '@nestjs/common';
-import type { LoginUseCase, LoginResponse } from '../../application/use-cases/login.usecase';
-import type { RegisterUseCase, RegisterResponse } from '../../application/use-cases/register.usecase';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  ValidationPipe,
+  Inject,
+} from '@nestjs/common';
+import { LoginUseCase } from '../../application/use-cases/login.usecase';
+import { RegisterUseCase } from '../../application/use-cases/register.usecase';
 import { JwtAuthGuard } from '../../infrastructure/security/jwt-auth.guard';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
@@ -8,17 +16,20 @@ import { RegisterDto } from '../dto/register.dto';
 @Controller('auth')
 export class AuthController {
   constructor(
+    @Inject(LoginUseCase)
     private readonly loginUseCase: LoginUseCase,
+
+    @Inject(RegisterUseCase)
     private readonly registerUseCase: RegisterUseCase,
   ) {}
 
   @Post('login')
-  async login(@Body(ValidationPipe) loginDto: LoginDto): Promise<LoginResponse> {
+  async login(@Body(ValidationPipe) loginDto: LoginDto) {
     return this.loginUseCase.execute(loginDto);
   }
 
   @Post('register')
-  async register(@Body(ValidationPipe) registerDto: RegisterDto): Promise<RegisterResponse> {
+  async register(@Body(ValidationPipe) registerDto: RegisterDto) {
     return this.registerUseCase.execute(registerDto);
   }
 

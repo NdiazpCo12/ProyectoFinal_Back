@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Challenge, Difficulty, ChallengeStatus } from '../../domain/entities/challenge.entity';
 import type { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
 
@@ -27,18 +27,19 @@ export interface UpdateChallengeResponse {
 
 @Injectable()
 export class UpdateChallengeUseCase {
-  constructor(private readonly challengeRepository: IChallengeRepository) {}
+  constructor(
+    @Inject('IChallengeRepository')
+    private readonly challengeRepository: any,
+  ) {}
 
   async execute(updateDto: UpdateChallengeDto): Promise<UpdateChallengeResponse> {
     const { id, ...updateFields } = updateDto;
 
-    // Find existing challenge
     const existingChallenge = await this.challengeRepository.findById(id);
     if (!existingChallenge) {
       throw new NotFoundException('Challenge not found');
     }
 
-    // Update challenge entity
     const updatedChallenge = existingChallenge.update(
       updateFields.title,
       updateFields.description,
@@ -49,7 +50,6 @@ export class UpdateChallengeUseCase {
       updateFields.status,
     );
 
-    // Save updated challenge
     const savedChallenge = await this.challengeRepository.update(updatedChallenge);
 
     return {

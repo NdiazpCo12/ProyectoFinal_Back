@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Challenge, Difficulty } from '../../domain/entities/challenge.entity';
-import type { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
+import { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
 import type { ITestCaseRepository } from '../../domain/interfaces/itestcase.repo';
 import { TestCase } from '../../domain/entities/testcase.entity';
 
@@ -34,8 +34,11 @@ export interface CreateChallengeResponse {
 @Injectable()
 export class CreateChallengeUseCase {
   constructor(
-    private readonly challengeRepository: IChallengeRepository,
-    private readonly testCaseRepository: ITestCaseRepository,
+  @Inject('IChallengeRepository')
+  private readonly challengeRepository: any,
+
+  @Inject('ITestCaseRepository')
+  private readonly testCaseRepository: any,
   ) {}
 
   async execute(createChallengeDto: CreateChallengeDto): Promise<CreateChallengeResponse> {

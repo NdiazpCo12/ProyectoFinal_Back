@@ -19,13 +19,25 @@ import { JwtStrategy } from '../../infrastructure/security/jwt.strategy';
   ],
   controllers: [AuthController],
   providers: [
+    // Casos de uso
     LoginUseCase,
     RegisterUseCase,
-    UserRepository,
+
+    // Repositorio
+    {
+      provide: 'IUserRepository',
+      useClass: UserRepository,
+    },
+
+    // Servicios
+    {
+      provide: 'BcryptService',
+      useClass: BcryptService,
+    },
+
     PrismaService,
-    BcryptService,
     JwtStrategy,
   ],
-  exports: [JwtStrategy],
+  exports: [JwtStrategy, JwtModule], // Exportamos JwtModule para que JwtService esté disponible
 })
 export class AuthModule {}
