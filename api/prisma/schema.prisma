@@ -67,3 +67,17 @@ model TestCase {
 
   @@map("test_cases")
 }
+
+model Submission {
+  id          String   @id @default(uuid())
+  userId      String
+  challengeId String
+  language    String
+  code        String
+  status      String
+  result      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("submissions")
+}
