@@ -43,6 +43,65 @@ services:
     volumes:
       - redis_data:/data
 
+  worker_python:
+    build:
+      context: ./workers/worker_python
+      dockerfile: Dockerfile
+    container_name: worker_python
+    environment:
+      - WORKER_NAME=worker_python
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/backend
+      - TIME_LIMIT_MS=5000
+    depends_on:
+      - redis
+      - db
+    command: npm run start:dev
+    volumes:
+      - ./workers/worker_python:/app
+      - /app/node_modules
+
+  worker_java:
+    build:
+      context: ./workers/worker_java
+      dockerfile: DockerFile
+    container_name: worker_java
+    environment:
+      - WORKER_NAME=worker_java
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/backend
+      - TIME_LIMIT_MS=5000
+      - MEMORY_LIMIT_MB=256
+    depends_on:
+      - redis
+      - db
+    command: npm run start:dev
+    volumes:
+      - ./workers/worker_java:/app
+      - /app/node_modules
+
+  worker_cpp:
+    build:
+      context: ./workers/worker_c++
+      dockerfile: DockerFile
+    container_name: worker_cpp
+    environment:
+      - WORKER_NAME=worker_cpp
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/backend
+      - TIME_LIMIT_MS=5000
+      - MEMORY_LIMIT_MB=256
+    depends_on:
+      - redis
+      - db
+    command: npm run start:dev
+    volumes:
+      - ./workers/worker_c++:/app
+      - /app/node_modules
+
 volumes:
   postgres_data:
   redis_data:

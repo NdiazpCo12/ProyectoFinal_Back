@@ -1,0 +1,71 @@
+import { Job } from 'bullmq';
+import { env } from '../config/env.config';
+import { PythonRunner } from '../runners/python.runner';
+import {
+  SubmissionJob,
+  SubmissionResultPayload,
+} from '../types/submission.type';
+import {
+  fetchTestCases,
+  updateSubmissionStatus,
+} from '../utils/db';
+
+const runner = new PythonRunner({ timeLimitMs: env.timeLimitMs });
+
+export async function processSubmissionJob(
+  job: Job<SubmissionJob>,
+): Promise<SubmissionResultPayload> {
+  const { data } = job;
+
+  await updateSubmissionStatus(data.id, 'RUNNING');
+
+  const language = (data.language ?? '').toLowerCase();
+  if (language !== 'python' && language !== 'py' && language !== 'python3') {
+    const unsupportedResult: SubmissionResultPayload = {
+      status: 'RUNTIME_ERROR',
+      timeMsTotal: 0,
+      score: 0,
+      cases: [],
+    };
+
+    await updateSubmissionStatus(
+      data.id,
+      unsupportedResult.status,
+      unsupportedResult,
+    );
+
+    job.log(
+      `Unsupported language "${data.language}". Python worker will skip this job.`,
+    );
+    return unsupportedResult;
+  }
+
+  try {
+    const testCases = await fetchTestCases(data.challengeId);
+    const result = await runner.run(data.code, testCases);
+    await updateSubmissionStatus(data.id, result.status, result);
+    return result;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    const failure: SubmissionResultPayload = {
+      status: 'RUNTIME_ERROR',
+      timeMsTotal: 0,
+      score: 0,
+      cases: [
+        {
+          caseId: 'internal-error',
+          status: 'RUNTIME_ERROR',
+          timeMs: 0,
+          output: '',
+          expectedOutput: '',
+          error: message,
+        },
+      ],
+    };
+
+    await updateSubmissionStatus(data.id, failure.status, failure);
+
+    job.log(`Unhandled error processing submission ${data.id}: ${message}`);
+    throw error;
+  }
+}
