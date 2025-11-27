@@ -22,20 +22,6 @@ export async function processSubmissionJob(
 
   await updateSubmissionStatus(data.id, 'RUNNING');
 
-  const language = (data.language ?? '').toLowerCase();
-  if (language !== 'c++' && language !== 'cpp' && language !== 'cxx') {
-    const unsupported: SubmissionResultPayload = {
-      status: 'RUNTIME_ERROR',
-      timeMsTotal: 0,
-      score: 0,
-      cases: [],
-    };
-
-    await updateSubmissionStatus(data.id, unsupported.status, unsupported);
-    job.log(`Unsupported language "${data.language}" for C++ worker.`);
-    return unsupported;
-  }
-
   try {
     const testCases = await fetchTestCases(data.challengeId);
     const result = await runner.run(data.code, testCases);

@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto';
+
 export enum SubmissionStatus {
   QUEUED = 'QUEUED',
   RUNNING = 'RUNNING',
@@ -22,7 +24,7 @@ export class Submission {
 
   static create(userId: string, challengeId: string, language: string, code: string) {
     return new Submission(
-      crypto.randomUUID(),
+      randomUUID(),
       userId,
       challengeId,
       language,

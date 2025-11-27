@@ -65,7 +65,7 @@ services:
   worker_java:
     build:
       context: ./workers/worker_java
-      dockerfile: DockerFile
+      dockerfile: Dockerfile
     container_name: worker_java
     environment:
       - WORKER_NAME=worker_java
@@ -85,7 +85,7 @@ services:
   worker_cpp:
     build:
       context: ./workers/worker_c++
-      dockerfile: DockerFile
+      dockerfile: Dockerfile
     container_name: worker_cpp
     environment:
       - WORKER_NAME=worker_cpp
@@ -100,6 +100,26 @@ services:
     command: npm run start:dev
     volumes:
       - ./workers/worker_c++:/app
+      - /app/node_modules
+
+  worker_node:
+    build:
+      context: ./workers/worker_node
+      dockerfile: Dockerfile
+    container_name: worker_node
+    environment:
+      - WORKER_NAME=worker_node
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/backend
+      - TIME_LIMIT_MS=5000
+      - MEMORY_LIMIT_MB=256
+    depends_on:
+      - redis
+      - db
+    command: npm run start:dev
+    volumes:
+      - ./workers/worker_node:/app
       - /app/node_modules
 
 volumes:

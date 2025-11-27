@@ -5,7 +5,7 @@ import { processSubmissionJob } from './processor';
 import { SubmissionJob } from '../types/submission.type';
 
 export function createSubmissionWorker() {
-  const worker = new Worker<SubmissionJob>('submissions', processSubmissionJob, {
+  const worker = new Worker<SubmissionJob>('submissions-python', processSubmissionJob, {
     connection: redisConnection,
     concurrency: 1,
   });
