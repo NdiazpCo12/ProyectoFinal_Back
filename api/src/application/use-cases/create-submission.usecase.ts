@@ -18,7 +18,9 @@ export class CreateSubmissionUseCase {
   ) {}
 
   async execute(dto: CreateSubmissionDto) {
+    console.log('CreateSubmissionDto:', JSON.stringify(dto, null, 2));
     const submission = Submission.create(dto.userId, dto.challengeId, dto.language, dto.code);
+    console.log('Submission created:', JSON.stringify({ id: submission.id, userId: submission.userId }, null, 2));
     const saved = await this.submissionRepository.create(submission);
 
     await this.jobQueue.enqueue({

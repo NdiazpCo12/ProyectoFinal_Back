@@ -43,6 +43,30 @@ services:
     volumes:
       - redis_data:/data
 
+  python_runner:
+    build:
+      context: ./runners/python-runner
+      dockerfile: Dockerfile
+    image: python-runner:latest
+
+  java_runner:
+    build:
+      context: ./runners/java-runner
+      dockerfile: Dockerfile
+    image: java-runner:latest
+
+  node_runner:
+    build:
+      context: ./runners/node-runner
+      dockerfile: Dockerfile
+    image: node-runner:latest
+
+  cpp_runner:
+    build:
+      context: ./runners/cpp-runner
+      dockerfile: Dockerfile
+    image: cpp-runner:latest
+
   worker_python:
     build:
       context: ./workers/worker_python
@@ -57,10 +81,13 @@ services:
     depends_on:
       - redis
       - db
+      - python_runner
     command: npm run start:dev
     volumes:
       - ./workers/worker_python:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner_sandboxes:/app/.sandbox:rw
 
   worker_java:
     build:
@@ -77,10 +104,13 @@ services:
     depends_on:
       - redis
       - db
+      - java_runner
     command: npm run start:dev
     volumes:
       - ./workers/worker_java:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner_sandboxes:/app/.sandbox:rw
 
   worker_cpp:
     build:
@@ -97,10 +127,13 @@ services:
     depends_on:
       - redis
       - db
+      - cpp_runner
     command: npm run start:dev
     volumes:
       - ./workers/worker_c++:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner_sandboxes:/app/.sandbox:rw
 
   worker_node:
     build:
@@ -117,11 +150,15 @@ services:
     depends_on:
       - redis
       - db
+      - node_runner
     command: npm run start:dev
     volumes:
       - ./workers/worker_node:/app
       - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner_sandboxes:/app/.sandbox:rw
 
 volumes:
   postgres_data:
   redis_data:
+  runner_sandboxes:
