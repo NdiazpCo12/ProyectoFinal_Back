@@ -13,15 +13,15 @@ export class SubmissionsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Request() req: any, @Body(ValidationPipe) body: any) {
-    console.log('Request user:', JSON.stringify(req.user, null, 2));
     const userId = req.user?.id;
-    console.log('Extracted userId:', userId);
+    const role = req.user?.role;
     if (!userId) {
       throw new Error(`User not authenticated. User object: ${JSON.stringify(req.user)}`);
     }
     return this.createSubmissionUseCase.execute({
       ...body,
       userId,
+      role,
     });
   }
 

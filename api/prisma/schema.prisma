@@ -35,6 +35,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  enrolledCourses CourseEnrollment[]
+  taughtCourses   CourseProfessor[]
+
   @@map("users")
 }
 
@@ -43,25 +46,26 @@ model Challenge {
   title       String
   description String
   difficulty  Difficulty
-  tags        String[]        // Array de strings para tags
-  timeLimit   Int             // en milisegundos
-  memoryLimit Int             // en MB
+  tags        String[] // Array de strings para tags
+  timeLimit   Int // en milisegundos
+  memoryLimit Int // en MB
   status      ChallengeStatus @default(DRAFT)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  testCases TestCase[]
+  testCases        TestCase[]
+  courseChallenges CourseChallenge[]
 
   @@map("challenges")
 }
 
 model TestCase {
-  id          String   @id @default(cuid())
-  challengeId String
-  input       String   // entrada del caso de prueba
+  id             String   @id @default(cuid())
+  challengeId    String
+  input          String // entrada del caso de prueba
   expectedOutput String // salida esperada
-  isHidden    Boolean  @default(false) // casos ocultos para estudiantes
-  createdAt   DateTime @default(now())
+  isHidden       Boolean  @default(false) // casos ocultos para estudiantes
+  createdAt      DateTime @default(now())
 
   challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 
@@ -80,4 +84,59 @@ model Submission {
   updatedAt   DateTime @updatedAt
 
   @@map("submissions")
+}
+
+model Course {
+  id        String   @id @default(cuid())
+  name      String
+  nrc       String   @unique
+  period    String
+  group     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  enrollments      CourseEnrollment[]
+  professors       CourseProfessor[]
+  courseChallenges CourseChallenge[]
+
+  @@map("courses")
+}
+
+model CourseEnrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  enrolledAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+model CourseProfessor {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  assignedAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("course_professors")
+}
+
+model CourseChallenge {
+  id          String   @id @default(cuid())
+  courseId    String
+  challengeId String
+  assignedAt  DateTime @default(now())
+
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, challengeId])
+  @@map("course_challenges")
 }

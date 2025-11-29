@@ -7,12 +7,6 @@ export class SubmissionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(submission: Submission) {
-    console.log('SubmissionRepository.create - submission:', JSON.stringify({
-      id: submission.id,
-      userId: submission.userId,
-      challengeId: submission.challengeId,
-      language: submission.language,
-    }, null, 2));
     return this.prisma.submission.create({
       data: {
         id: submission.id,
