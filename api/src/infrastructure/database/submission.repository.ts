@@ -15,6 +15,7 @@ export class SubmissionRepository {
         language: submission.language,
         code: submission.code,
         status: submission.status,
+        evaluationId: submission.evaluationId,
         createdAt: submission.createdAt,
       },
     });

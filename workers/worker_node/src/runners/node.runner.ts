@@ -1,6 +1,3 @@
-import { promises as fs } from 'fs';
-import { dirname, join } from 'path';
-import { spawn } from 'child_process';
 import { performance } from 'node:perf_hooks';
 import {
   SubmissionCaseStatus,
@@ -9,7 +6,7 @@ import {
   SubmissionStatus,
   TestCase,
 } from '../types/submission.type';
-import { createSandboxDir, removeSandboxDir } from '../utils/sandbox';
+import { runDockerContainer } from '../utils/docker-runner';
 
 interface RunnerOptions {
   timeLimitMs: number;
@@ -18,14 +15,11 @@ interface RunnerOptions {
 interface CaseExecutionResult extends SubmissionResultCase {}
 
 export class NodeRunner {
+  private readonly imageName = 'node-runner:latest';
+
   constructor(private readonly options: RunnerOptions) {}
 
   async run(code: string, testCases: TestCase[]): Promise<SubmissionResultPayload> {
-    const sandbox = await createSandboxDir();
-    const scriptPath = join(sandbox, 'main.js');
-
-    await fs.writeFile(scriptPath, code, 'utf8');
-
     const cases: SubmissionResultCase[] = [];
     let totalTime = 0;
 
@@ -40,18 +34,14 @@ export class NodeRunner {
           },
         ];
 
-    try {
-      for (const testCase of casesToRun) {
-        const result = await this.executeCase(scriptPath, testCase);
-        totalTime += result.timeMs;
-        cases.push(result);
+    for (const testCase of casesToRun) {
+      const result = await this.executeCase(code, testCase);
+      totalTime += result.timeMs;
+      cases.push(result);
 
-        if (result.status !== 'OK') {
-          break;
-        }
+      if (result.status !== 'OK') {
+        break;
       }
-    } finally {
-      await removeSandboxDir(sandbox);
     }
 
     const allPassed = cases.every((item) => item.status === 'OK');
@@ -81,80 +71,65 @@ export class NodeRunner {
     }
   }
 
-  private executeCase(scriptPath: string, testCase: TestCase): Promise<CaseExecutionResult> {
-    return new Promise((resolve) => {
-      const start = performance.now();
-      const subprocess = spawn('node', [scriptPath], {
-        cwd: dirname(scriptPath),
-        stdio: ['pipe', 'pipe', 'pipe'],
-        env: { NODE_ENV: 'production' },
+  private async executeCase(code: string, testCase: TestCase): Promise<CaseExecutionResult> {
+    const start = performance.now();
+
+    try {
+      const result = await runDockerContainer({
+        image: this.imageName,
+        code,
+        input: testCase.input ?? '',
+        codeFileName: 'main.js',
+        timeLimitMs: this.options.timeLimitMs,
+        memoryLimitMb: 512,
       });
 
-      let stdout = '';
-      let stderr = '';
-      let resolved = false;
-      let timeoutHandle: NodeJS.Timeout | undefined;
+      const end = performance.now();
+      const timeMs = Math.round(end - start);
 
-      const finish = (status: SubmissionCaseStatus, error?: string) => {
-        if (resolved) return;
-        resolved = true;
-        if (timeoutHandle) clearTimeout(timeoutHandle);
+      const normalizedStdout = normalize(result.stdout);
+      const normalizedExpected = normalize(testCase.expectedOutput);
 
-        const end = performance.now();
-        resolve({
-          caseId: testCase.id,
-          status,
-          timeMs: Math.round(end - start),
-          output: stdout,
-          expectedOutput: testCase.expectedOutput,
-          error,
-        });
-      };
+      let status: SubmissionCaseStatus;
+      let error: string | undefined;
 
-      subprocess.stdout.setEncoding('utf8');
-      subprocess.stdout.on('data', (chunk: string) => {
-        stdout += chunk;
-      });
-
-      subprocess.stderr.setEncoding('utf8');
-      subprocess.stderr.on('data', (chunk: string) => {
-        stderr += chunk;
-      });
-
-      subprocess.on('error', (error) => {
-        finish('RUNTIME_ERROR', error.message);
-      });
-
-      subprocess.on('close', (code) => {
-        if (resolved) return;
-
-        const normalizedStdout = normalize(stdout);
-        const normalizedExpected = normalize(testCase.expectedOutput);
-
-        if (code === 0) {
-          if (normalizedStdout === normalizedExpected) {
-            finish('OK');
-          } else {
-            finish('WRONG_ANSWER');
-          }
+      if (result.timedOut || result.exitCode === 124) {
+        status = 'TIME_LIMIT_EXCEEDED';
+        error = `Exceeded ${this.options.timeLimitMs}ms limit`;
+      } else if (result.exitCode !== 0) {
+        const errorMessage = result.stderr.trim() || result.stdout.trim();
+        if (errorMessage.includes('SyntaxError') || errorMessage.includes('ReferenceError')) {
+          status = 'COMPILATION_ERROR';
+          error = errorMessage;
         } else {
-          const errorMessage = stderr.trim() || `Process exited with code ${code}`;
-          if (errorMessage.includes('SyntaxError')) {
-            finish('COMPILATION_ERROR', errorMessage);
-          } else {
-            finish('RUNTIME_ERROR', errorMessage);
-          }
+          status = 'RUNTIME_ERROR';
+          error = errorMessage || `Process exited with code ${result.exitCode}`;
         }
-      });
+      } else if (normalizedStdout === normalizedExpected) {
+        status = 'OK';
+      } else {
+        status = 'WRONG_ANSWER';
+      }
 
-      timeoutHandle = setTimeout(() => {
-        subprocess.kill('SIGKILL');
-        finish('TIME_LIMIT_EXCEEDED', `Exceeded ${this.options.timeLimitMs}ms limit`);
-      }, this.options.timeLimitMs);
-
-      subprocess.stdin.write(testCase.input ?? '');
-      subprocess.stdin.end();
-    });
+      return {
+        caseId: testCase.id,
+        status,
+        timeMs,
+        output: normalizedStdout,
+        expectedOutput: testCase.expectedOutput,
+        error,
+      };
+    } catch (error) {
+      const end = performance.now();
+      return {
+        caseId: testCase.id,
+        status: 'RUNTIME_ERROR',
+        timeMs: Math.round(end - start),
+        output: '',
+        expectedOutput: testCase.expectedOutput,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
   }
 }
 

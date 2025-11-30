@@ -6,10 +6,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-// Módulos de tu aplicación
+// Módulos apP
 import { AuthModule } from './interfaces/auth/auth.module';
 import { ChallengesModule } from './interfaces/challenges/challenges.module';
 import { SubmissionsModule } from './interfaces/submissions/submissions.module';
+import { CoursesModule } from './interfaces/courses/courses.module';
+import { EvaluationsModule } from './interfaces/evaluations/evaluations.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 
 // Servicios e infraestructura
@@ -23,23 +25,25 @@ import { JwtStrategy } from './infrastructure/security/jwt.strategy';
       isGlobal: true,
     }),
 
-    // Módulo JWT compartido (para que JwtService funcione globalmente)
+    // JWT compartido (para que JwtService funcione globalmente)
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
       signOptions: { expiresIn: '24h' },
     }),
 
-    // Módulos principales de la app
+    // MODULES principales de la app
     AuthModule,
     ChallengesModule,
     SubmissionsModule,
+    CoursesModule,
+    EvaluationsModule,
     RedisModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     PrismaService,
-    JwtStrategy, // ✅ Estrategia JWT disponible globalmente
+    JwtStrategy, //EstrategY JWT disponible globalmente
   ],
 })
 export class AppModule {}

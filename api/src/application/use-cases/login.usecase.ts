@@ -27,7 +27,7 @@ export class LoginUseCase {
     @Inject('BcryptService')
     private readonly bcryptService: BcryptService,
 
-    private readonly jwtService: JwtService, // ✅ Nest lo inyecta automáticamente
+    private readonly jwtService: JwtService,
   ) {}
 
   async execute(loginDto: LoginDto): Promise<LoginResponse> {

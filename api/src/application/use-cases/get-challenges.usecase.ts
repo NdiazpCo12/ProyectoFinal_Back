@@ -1,10 +1,13 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Challenge } from '../../domain/entities/challenge.entity';
-import { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
+import type { IChallengeRepository } from '../../domain/interfaces/ichallenge.repo';
+import { PrismaService } from '../../infrastructure/database/prisma.service';
 
 export interface GetChallengesDto {
   status?: string;
   includeHiddenTestCases?: boolean;
+  userId?: string;
+  role?: string;
 }
 
 export interface ChallengeSummary {
@@ -23,19 +26,51 @@ export interface ChallengeSummary {
 @Injectable()
 export class GetChallengesUseCase {
   constructor(
-  @Inject('IChallengeRepository')
-  private readonly challengeRepository: any,
-) {}
+    @Inject('IChallengeRepository')
+    private readonly challengeRepository: any,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async execute(dto: GetChallengesDto = {}): Promise<ChallengeSummary[]> {
-    const { status } = dto;
+    const { status, userId, role } = dto;
 
     let challenges: Challenge[];
 
-    if (status) {
-      challenges = await this.challengeRepository.findByStatus(status);
+    if (role === 'STUDENT' && userId) {
+      const enrollments = await this.prisma.courseEnrollment.findMany({
+        where: { userId },
+        include: {
+          course: {
+            include: {
+              courseChallenges: {
+                include: {
+                  challenge: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const challengeIds = new Set<string>();
+      enrollments.forEach(enrollment => {
+        enrollment.course.courseChallenges.forEach(cc => {
+          challengeIds.add(cc.challengeId);
+        });
+      });
+
+      const allChallenges = await this.challengeRepository.findAll();
+      challenges = allChallenges.filter(c => challengeIds.has(c.id));
+
+      if (status) {
+        challenges = challenges.filter(c => c.status === status);
+      }
     } else {
-      challenges = await this.challengeRepository.findAll();
+      if (status) {
+        challenges = await this.challengeRepository.findByStatus(status);
+      } else {
+        challenges = await this.challengeRepository.findAll();
+      }
     }
 
     return challenges.map(challenge => ({
@@ -52,8 +87,37 @@ export class GetChallengesUseCase {
     }));
   }
 
-  async getPublishedChallenges(): Promise<ChallengeSummary[]> {
-    const challenges = await this.challengeRepository.findPublished();
+  async getPublishedChallenges(userId?: string, role?: string): Promise<ChallengeSummary[]> {
+    let challenges: Challenge[];
+
+    if (role === 'STUDENT' && userId) {
+      const enrollments = await this.prisma.courseEnrollment.findMany({
+        where: { userId },
+        include: {
+          course: {
+            include: {
+              courseChallenges: {
+                include: {
+                  challenge: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const challengeIds = new Set<string>();
+      enrollments.forEach(enrollment => {
+        enrollment.course.courseChallenges.forEach(cc => {
+          challengeIds.add(cc.challengeId);
+        });
+      });
+
+      const allChallenges = await this.challengeRepository.findPublished();
+      challenges = allChallenges.filter(c => challengeIds.has(c.id));
+    } else {
+      challenges = await this.challengeRepository.findPublished();
+    }
 
     return challenges.map(challenge => ({
       id: challenge.id,
@@ -69,10 +133,29 @@ export class GetChallengesUseCase {
     }));
   }
 
-  async getChallengeById(id: string): Promise<ChallengeSummary | null> {
+  async getChallengeById(id: string, userId?: string, role?: string): Promise<ChallengeSummary | null> {
     const challenge = await this.challengeRepository.findById(id);
 
     if (!challenge) return null;
+
+    if (role === 'STUDENT' && userId) {
+      const courseChallenge = await this.prisma.courseChallenge.findFirst({
+        where: { challengeId: id },
+        include: {
+          course: {
+            include: {
+              enrollments: {
+                where: { userId },
+              },
+            },
+          },
+        },
+      });
+
+      if (!courseChallenge || courseChallenge.course.enrollments.length === 0) {
+        throw new NotFoundException('No tienes acceso a este reto');
+      }
+    }
 
     return {
       id: challenge.id,

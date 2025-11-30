@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   UseGuards,
+  Request,
   ValidationPipe,
   Inject,
 } from '@nestjs/common';
@@ -35,19 +36,26 @@ export class ChallengesController {
     private readonly deleteChallengeUseCase: DeleteChallengeUseCase,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async getChallenges(@Query('status') status?: string) {
-    return this.getChallengesUseCase.execute({ status });
+  async getChallenges(@Query('status') status?: string, @Request() req?: any) {
+    return this.getChallengesUseCase.execute({
+      status,
+      userId: req?.user?.id,
+      role: req?.user?.role,
+    });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('published')
-  async getPublishedChallenges() {
-    return this.getChallengesUseCase.getPublishedChallenges();
+  async getPublishedChallenges(@Request() req?: any) {
+    return this.getChallengesUseCase.getPublishedChallenges(req?.user?.id, req?.user?.role);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async getChallengeById(@Param('id') id: string) {
-    return this.getChallengesUseCase.getChallengeById(id);
+  async getChallengeById(@Param('id') id: string, @Request() req?: any) {
+    return this.getChallengesUseCase.getChallengeById(id, req?.user?.id, req?.user?.role);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
