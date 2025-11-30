@@ -11,6 +11,7 @@ import { AuthModule } from './interfaces/auth/auth.module';
 import { ChallengesModule } from './interfaces/challenges/challenges.module';
 import { SubmissionsModule } from './interfaces/submissions/submissions.module';
 import { CoursesModule } from './interfaces/courses/courses.module';
+import { EvaluationsModule } from './interfaces/evaluations/evaluations.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 
 // Servicios e infraestructura
@@ -35,6 +36,7 @@ import { JwtStrategy } from './infrastructure/security/jwt.strategy';
     ChallengesModule,
     SubmissionsModule,
     CoursesModule,
+    EvaluationsModule,
     RedisModule,
   ],
   controllers: [AppController],

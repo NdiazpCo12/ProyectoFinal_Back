@@ -18,11 +18,18 @@ export class Submission {
     public readonly language: string,
     public readonly code: string,
     public status: SubmissionStatus = SubmissionStatus.QUEUED,
+    public readonly evaluationId?: string,
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date(),
   ) {}
 
-  static create(userId: string, challengeId: string, language: string, code: string) {
+  static create(
+    userId: string,
+    challengeId: string,
+    language: string,
+    code: string,
+    evaluationId?: string,
+  ) {
     return new Submission(
       randomUUID(),
       userId,
@@ -30,6 +37,7 @@ export class Submission {
       language,
       code,
       SubmissionStatus.QUEUED,
+      evaluationId,
     );
   }
 }

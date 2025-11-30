@@ -27,6 +27,12 @@ enum Difficulty {
   HARD
 }
 
+enum EvaluationStatus {
+  SCHEDULED
+  ACTIVE
+  CLOSED
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -53,8 +59,9 @@ model Challenge {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  testCases        TestCase[]
-  courseChallenges CourseChallenge[]
+  testCases            TestCase[]
+  courseChallenges     CourseChallenge[]
+  evaluationChallenges EvaluationChallenge[]
 
   @@map("challenges")
 }
@@ -73,15 +80,18 @@ model TestCase {
 }
 
 model Submission {
-  id          String   @id @default(uuid())
-  userId      String
-  challengeId String
-  language    String
-  code        String
-  status      String
-  result      Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid())
+  userId        String
+  challengeId   String
+  language      String
+  code          String
+  status        String
+  result        Json?
+  evaluationId  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  evaluation Evaluation? @relation(fields: [evaluationId], references: [id], onDelete: SetNull)
 
   @@map("submissions")
 }
@@ -95,9 +105,10 @@ model Course {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  enrollments      CourseEnrollment[]
-  professors       CourseProfessor[]
-  courseChallenges CourseChallenge[]
+  enrollments        CourseEnrollment[]
+  professors         CourseProfessor[]
+  courseChallenges   CourseChallenge[]
+  evaluationCourses  EvaluationCourse[]
 
   @@map("courses")
 }
@@ -139,4 +150,48 @@ model CourseChallenge {
 
   @@unique([courseId, challengeId])
   @@map("course_challenges")
+}
+
+model Evaluation {
+  id          String            @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  duration    Int // duración en minutos
+  maxAttempts Int? // máximo de intentos por reto (null = ilimitado)
+  status      EvaluationStatus  @default(SCHEDULED)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  challenges EvaluationChallenge[]
+  courses    EvaluationCourse[]
+  submissions Submission[]
+
+  @@map("evaluations")
+}
+
+model EvaluationChallenge {
+  id            String   @id @default(cuid())
+  evaluationId  String
+  challengeId   String
+  assignedAt    DateTime @default(now())
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([evaluationId, challengeId])
+  @@map("evaluation_challenges")
+}
+
+model EvaluationCourse {
+  id           String   @id @default(cuid())
+  evaluationId String
+  courseId     String
+  assignedAt   DateTime @default(now())
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([evaluationId, courseId])
+  @@map("evaluation_courses")
 }
