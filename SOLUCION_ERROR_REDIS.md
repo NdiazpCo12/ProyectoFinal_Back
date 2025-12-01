@@ -44,7 +44,7 @@ En `api/prisma/schema.prisma`:
 
 ```prisma
 datasource db {
-  provider = "postgresql"  // NO debe ser "sqlite"
+  provider = "postgresql"  
   url      = env("DATABASE_URL")
 }
 ```

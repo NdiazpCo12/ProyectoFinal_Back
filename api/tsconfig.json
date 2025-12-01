@@ -12,7 +12,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2023",
     "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "../dist-api",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
@@ -22,5 +22,5 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   },
-  "exclude": ["src/seed.ts"]
+  "exclude": ["src/seed.ts", "dist", "node_modules"]
 }

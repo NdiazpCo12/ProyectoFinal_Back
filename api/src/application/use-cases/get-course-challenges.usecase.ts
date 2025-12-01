@@ -67,7 +67,7 @@ export class GetCourseChallengesUseCase {
       title: cc.challenge.title,
       description: cc.challenge.description,
       difficulty: cc.challenge.difficulty,
-      tags: cc.challenge.tags ? cc.challenge.tags.split(',').map(tag => tag.trim()) : [],
+      tags: cc.challenge.tags ? String(cc.challenge.tags).split(',').map(tag => tag.trim()) : [],
       timeLimit: cc.challenge.timeLimit,
       memoryLimit: cc.challenge.memoryLimit,
       status: cc.challenge.status,
