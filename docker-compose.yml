@@ -11,6 +11,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - GEMINI_API_KEY=AIzaSyAA3sX_6k5nh3x0uua8pwUhYHb91tctXeQ
     depends_on:
       - db
       - redis
@@ -103,6 +104,8 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/backend
       - TIME_LIMIT_MS=5000
       - MEMORY_LIMIT_MB=256
+      - DOCKER_PATH=/usr/bin/docker
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     depends_on:
       - redis
       - db
@@ -126,6 +129,8 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/backend
       - TIME_LIMIT_MS=5000
       - MEMORY_LIMIT_MB=256
+      - DOCKER_PATH=/usr/bin/docker
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     depends_on:
       - redis
       - db
