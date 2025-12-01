@@ -30,9 +30,12 @@ const ChallengeList: React.FC = () => {
           difficulty: filters.difficulty,
         });
       } else {
-        data = await challengesApi.getPublishedChallenges();
+        data = await challengesApi.getPublishedChallenges({
+          difficulty: filters.difficulty,
+        });
       }
 
+      // Aplicar filtro de búsqueda
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase();
         data = data.filter(challenge =>
@@ -148,30 +151,28 @@ const ChallengeList: React.FC = () => {
             </div>
 
             {user?.role === 'ADMIN' && (
-              <>
-                <select
-                  value={filters.status || ''}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="bg-slate-700/50 border border-slate-600 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                >
-                  <option value="">Todos los estados</option>
-                  <option value="DRAFT">Borrador</option>
-                  <option value="PUBLISHED">Publicado</option>
-                  <option value="ARCHIVED">Archivado</option>
-                </select>
-
-                <select
-                  value={filters.difficulty || ''}
-                  onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-                  className="bg-slate-700/50 border border-slate-600 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                >
-                  <option value="">Todas las dificultades</option>
-                  <option value="EASY">Fácil</option>
-                  <option value="MEDIUM">Medio</option>
-                  <option value="HARD">Difícil</option>
-                </select>
-              </>
+              <select
+                value={filters.status || ''}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+                className="bg-slate-700/50 border border-slate-600 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              >
+                <option value="">Todos los estados</option>
+                <option value="DRAFT">Borrador</option>
+                <option value="PUBLISHED">Publicado</option>
+                <option value="ARCHIVED">Archivado</option>
+              </select>
             )}
+
+            <select
+              value={filters.difficulty || ''}
+              onChange={(e) => handleFilterChange('difficulty', e.target.value)}
+              className="bg-slate-700/50 border border-slate-600 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+            >
+              <option value="">Todas las dificultades</option>
+              <option value="EASY">Fácil</option>
+              <option value="MEDIUM">Medio</option>
+              <option value="HARD">Difícil</option>
+            </select>
 
             <Button
               variant="secondary"

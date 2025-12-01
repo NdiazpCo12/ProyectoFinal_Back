@@ -11,7 +11,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-      - GEMINI_API_KEY=AIzaSyAA3sX_6k5nh3x0uua8pwUhYHb91tctXeQ
+      - GEMINI_API_KEY=AIzaSyD1j59sVlJIzrQdxtH-QvD_xKRP4ODxZzI
     depends_on:
       - db
       - redis

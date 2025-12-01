@@ -38,9 +38,14 @@ export class ChallengesController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getChallenges(@Query('status') status?: string, @Request() req?: any) {
+  async getChallenges(
+    @Query('status') status?: string,
+    @Query('difficulty') difficulty?: string,
+    @Request() req?: any,
+  ) {
     return this.getChallengesUseCase.execute({
       status,
+      difficulty,
       userId: req?.user?.id,
       role: req?.user?.role,
     });
@@ -48,8 +53,11 @@ export class ChallengesController {
 
   @UseGuards(JwtAuthGuard)
   @Get('published')
-  async getPublishedChallenges(@Request() req?: any) {
-    return this.getChallengesUseCase.getPublishedChallenges(req?.user?.id, req?.user?.role);
+  async getPublishedChallenges(
+    @Query('difficulty') difficulty?: string,
+    @Request() req?: any,
+  ) {
+    return this.getChallengesUseCase.getPublishedChallenges(req?.user?.id, req?.user?.role, difficulty);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,0 +1,18 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker-java-scaler
+  namespace: runners
+spec:
+  scaleTargetRef:
+    name: worker-java
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  triggers:
+  - type: redis
+    metadata:
+      address: 172.20.0.2:6379
+      listName: bull:submissions-java:wait
+      listLength: "5"
+      activationListLength: "10"
+

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-node
+  namespace: runners
+  labels:
+    app: worker-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker-node
+  template:
+    metadata:
+      labels:
+        app: worker-node
+    spec:
+      containers:
+      - name: worker-node
+        image: worker-node:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: WORKER_NAME
+          value: worker-node
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: REDIS_PORT
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: worker-secrets
+              key: DATABASE_URL
+        - name: TIME_LIMIT_MS
+          valueFrom:
+            secretKeyRef:
+              name: worker-secrets
+              key: TIME_LIMIT_MS
+        - name: MEMORY_LIMIT_MB
+          valueFrom:
+            secretKeyRef:
+              name: worker-secrets
+              key: MEMORY_LIMIT_MB
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: sandbox
+          mountPath: /app/.sandbox
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: sandbox
+        emptyDir: {}
+

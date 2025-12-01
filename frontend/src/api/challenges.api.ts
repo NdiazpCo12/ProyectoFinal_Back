@@ -14,8 +14,8 @@ export const challengesApi = {
   },
 
   // Get only published challenges (for students)
-  getPublishedChallenges: async (): Promise<Challenge[]> => {
-    const response = await axiosInstance.get<Challenge[]>('/challenges/published');
+  getPublishedChallenges: async (params?: { difficulty?: string }): Promise<Challenge[]> => {
+    const response = await axiosInstance.get<Challenge[]>('/challenges/published', { params });
     return response.data;
   },
 

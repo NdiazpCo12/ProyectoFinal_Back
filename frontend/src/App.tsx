@@ -15,6 +15,7 @@ import SubmissionDetail from './pages/submissions/SubmissionDetail'
 import CourseList from './pages/courses/CourseList'
 import CourseForm from './pages/courses/CourseForm'
 import CourseDetail from './pages/courses/CourseDetail'
+import AiChallengeGenerator from './pages/ai/AiChallengeGenerator'
 import './App.css'
 
 function AppRoutes() {
@@ -128,6 +129,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <CourseDetail />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/ai/generate"
+        element={
+          <ProtectedRoute>
+            <AiChallengeGenerator />
           </ProtectedRoute>
         }
       />

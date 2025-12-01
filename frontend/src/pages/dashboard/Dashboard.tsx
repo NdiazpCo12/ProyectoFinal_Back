@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
-import { Code, BookOpen, FileCode, LogOut, User, Shield } from 'lucide-react';
+import { Code, BookOpen, FileCode, LogOut, User, Shield, Sparkles } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -107,12 +107,33 @@ const Dashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* Stats Section (for admins) */}
+        {/* AI Generator Section (for admins) */}
         {user?.role === 'ADMIN' && (
-          <div className="mt-12 text-center">
-            <p className="text-slate-500 text-sm">
-              Como administrador, puedes crear y gestionar retos, cursos y evaluaciones.
-            </p>
+          <div className="mt-12">
+            <div className="max-w-4xl mx-auto">
+              <Link to="/ai/generate" className="block group">
+                <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur border border-purple-500/30 rounded-2xl p-6 hover:border-purple-500/50 hover:from-purple-500/20 hover:to-pink-500/20 transition-all duration-300">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Sparkles className="w-7 h-7 text-purple-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-white mb-1">
+                        Generador de Retos con IA
+                      </h3>
+                      <p className="text-slate-400 text-sm">
+                        Usa inteligencia artificial para crear retos de programación automáticamente
+                      </p>
+                    </div>
+                    <div className="hidden sm:block">
+                      <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium border border-purple-500/30">
+                        Nuevo
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
           </div>
         )}
       </main>

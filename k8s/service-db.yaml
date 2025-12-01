@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: runners
+spec:
+  type: ExternalName
+  externalName: host.docker.internal
+  ports:
+  - port: 5432
+    targetPort: 5432

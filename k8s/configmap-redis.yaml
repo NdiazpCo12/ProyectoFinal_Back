@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: runners
+data:
+  REDIS_HOST: "172.19.0.3"
+  REDIS_PORT: "6379"
+  DATABASE_URL: postgresql://postgres:postgres@172.19.0.2:5432/backend
+

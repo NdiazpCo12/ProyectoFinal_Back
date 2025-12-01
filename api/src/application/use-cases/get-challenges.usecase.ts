@@ -5,6 +5,7 @@ import { PrismaService } from '../../infrastructure/database/prisma.service';
 
 export interface GetChallengesDto {
   status?: string;
+  difficulty?: string;
   includeHiddenTestCases?: boolean;
   userId?: string;
   role?: string;
@@ -38,7 +39,7 @@ export class GetChallengesUseCase {
   ) {}
 
   async execute(dto: GetChallengesDto = {}): Promise<ChallengeSummary[]> {
-    const { status, userId, role } = dto;
+    const { status, difficulty, userId, role } = dto;
 
     let challenges: Challenge[];
 
@@ -79,6 +80,11 @@ export class GetChallengesUseCase {
       }
     }
 
+    // Filtrar por dificultad si se especifica
+    if (difficulty) {
+      challenges = challenges.filter(c => c.difficulty === difficulty);
+    }
+
     return challenges.map(challenge => ({
       id: challenge.id,
       title: challenge.title,
@@ -93,7 +99,7 @@ export class GetChallengesUseCase {
     }));
   }
 
-  async getPublishedChallenges(userId?: string, role?: string): Promise<ChallengeSummary[]> {
+  async getPublishedChallenges(userId?: string, role?: string, difficulty?: string): Promise<ChallengeSummary[]> {
     let challenges: Challenge[];
 
     if (role === 'STUDENT' && userId) {
@@ -123,6 +129,11 @@ export class GetChallengesUseCase {
       challenges = allChallenges.filter(c => challengeIds.has(c.id));
     } else {
       challenges = await this.challengeRepository.findPublished();
+    }
+
+    // Filtrar por dificultad si se especifica
+    if (difficulty) {
+      challenges = challenges.filter(c => c.difficulty === difficulty);
     }
 
     return challenges.map(challenge => ({
