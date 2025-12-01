@@ -21,6 +21,12 @@ export interface ChallengeSummary {
   status: string;
   createdAt: Date;
   updatedAt: Date;
+  testCases?: {
+    id: string;
+    input: string;
+    expectedOutput: string;
+    isHidden: boolean;
+  }[];
 }
 
 @Injectable()
@@ -157,6 +163,22 @@ export class GetChallengesUseCase {
       }
     }
 
+    // Get test cases for the challenge
+    const testCases = await this.prisma.testCase.findMany({
+      where: { challengeId: id },
+      select: {
+        id: true,
+        input: true,
+        expectedOutput: true,
+        isHidden: true,
+      },
+    });
+
+    // Filter out hidden test cases for students
+    const visibleTestCases = role === 'STUDENT'
+      ? testCases.filter(tc => !tc.isHidden)
+      : testCases;
+
     return {
       id: challenge.id,
       title: challenge.title,
@@ -168,6 +190,7 @@ export class GetChallengesUseCase {
       status: challenge.status,
       createdAt: challenge.createdAt,
       updatedAt: challenge.updatedAt,
+      testCases: visibleTestCases,
     };
   }
 }

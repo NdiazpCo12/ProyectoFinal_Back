@@ -52,7 +52,7 @@ model Challenge {
   title       String
   description String
   difficulty  Difficulty
-  tags        String[] // Array de strings para tags
+  tags        String // Comma-separated string for tags
   timeLimit   Int // en milisegundos
   memoryLimit Int // en MB
   status      ChallengeStatus @default(DRAFT)
