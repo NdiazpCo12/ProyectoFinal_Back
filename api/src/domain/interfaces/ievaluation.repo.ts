@@ -15,3 +15,5 @@ export interface IEvaluationRepository {
   findEvaluationsByProfessor(userId: string): Promise<Evaluation[]>;
 }
 
+
+

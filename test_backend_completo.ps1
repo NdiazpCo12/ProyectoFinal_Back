@@ -318,14 +318,15 @@ try {
     Write-Host "   Submission creado: $submissionId" -ForegroundColor Green
     Write-Host "   Estado inicial: $($submissionResponse.status)" -ForegroundColor Cyan
     
-    Write-Host "   Esperando procesamiento (10 segundos)..." -ForegroundColor Yellow
-    Start-Sleep -Seconds 10
+    Write-Host "   Esperando procesamiento (15 segundos)..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 15
 } catch {
     Write-Host "   Error creando submission: $_" -ForegroundColor Red
     if ($_.ErrorDetails.Message) {
         Write-Host "   Detalles: $($_.ErrorDetails.Message)" -ForegroundColor Red
     }
     Write-Host "   Body enviado: $submissionBodyJson" -ForegroundColor Yellow
+    $submissionId = $null
 }
 
 Write-Host ""
@@ -333,15 +334,33 @@ Write-Host ""
 # Paso 12: Estudiante consulta estado
 Write-Host "12. Estudiante consulta estado de submission..." -ForegroundColor Yellow
 
-try {
-    $submissionStatus = Invoke-RestMethod -Uri "$baseUrl/submissions/$submissionId" -Method GET -Headers $studentHeaders
-    Write-Host "   Estado: $($submissionStatus.status)" -ForegroundColor Green
-    if ($submissionStatus.result) {
-        Write-Host "   Puntaje: $($submissionStatus.result.score)" -ForegroundColor Cyan
-        Write-Host "   Tiempo: $($submissionStatus.result.timeMsTotal) ms" -ForegroundColor Cyan
+if ($submissionId) {
+    try {
+        $submissionStatus = Invoke-RestMethod -Uri "$baseUrl/submissions/$submissionId" -Method GET -Headers $studentHeaders
+        Write-Host "   Estado: $($submissionStatus.status)" -ForegroundColor Green
+        if ($submissionStatus.result) {
+            if ($submissionStatus.result -is [PSCustomObject]) {
+                Write-Host "   Puntaje: $($submissionStatus.result.score)" -ForegroundColor Cyan
+                Write-Host "   Tiempo: $($submissionStatus.result.timeMsTotal) ms" -ForegroundColor Cyan
+            } elseif ($submissionStatus.result -is [string]) {
+                $resultObj = $submissionStatus.result | ConvertFrom-Json -ErrorAction SilentlyContinue
+                if ($resultObj) {
+                    Write-Host "   Puntaje: $($resultObj.score)" -ForegroundColor Cyan
+                    Write-Host "   Tiempo: $($resultObj.timeMsTotal) ms" -ForegroundColor Cyan
+                } else {
+                    Write-Host "   Resultado: $($submissionStatus.result)" -ForegroundColor Cyan
+                }
+            } else {
+                Write-Host "   Resultado: $($submissionStatus.result | ConvertTo-Json -Compress)" -ForegroundColor Cyan
+            }
+        } else {
+            Write-Host "   Aun procesando..." -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "   Error consultando submission: $_" -ForegroundColor Red
     }
-} catch {
-    Write-Host "   Error consultando submission: $_" -ForegroundColor Red
+} else {
+    Write-Host "   No se pudo crear submission, saltando consulta" -ForegroundColor Yellow
 }
 
 Write-Host ""
@@ -359,6 +378,9 @@ try {
     Write-Host "   Estudiantes evaluados: $($results.results.Count)" -ForegroundColor Cyan
     foreach ($result in $results.results) {
         Write-Host "   - $($result.studentEmail): $($result.totalScore) puntos" -ForegroundColor Yellow
+        foreach ($challengeResult in $result.challengeResults) {
+            Write-Host "     * $($challengeResult.challengeTitle): $($challengeResult.bestScore) puntos ($($challengeResult.attemptCount) intentos)" -ForegroundColor Gray
+        }
     }
 } catch {
     Write-Host "   Error obteniendo resultados: $_" -ForegroundColor Red

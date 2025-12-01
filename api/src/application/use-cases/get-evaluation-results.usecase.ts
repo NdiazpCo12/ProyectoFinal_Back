@@ -80,7 +80,11 @@ export class GetEvaluationResultsUseCase {
             },
           },
         },
-        submissions: true,
+        submissions: {
+          where: {
+            evaluationId: evaluationId,
+          },
+        },
       },
     });
 
@@ -125,7 +129,19 @@ export class GetEvaluationResultsUseCase {
       const result = student.results.get(challengeId);
       result.attemptCount++;
 
-      const submissionResult = submission.result as any;
+      let submissionResult: any = null;
+      if (submission.result) {
+        if (typeof submission.result === 'string') {
+          try {
+            submissionResult = JSON.parse(submission.result);
+          } catch {
+            submissionResult = null;
+          }
+        } else {
+          submissionResult = submission.result;
+        }
+      }
+
       const score = submissionResult?.score || 0;
       const timeMs = submissionResult?.timeMsTotal || 0;
 
