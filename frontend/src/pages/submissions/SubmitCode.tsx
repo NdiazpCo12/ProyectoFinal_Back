@@ -8,7 +8,7 @@ import { CreateSubmissionRequest } from '../../types/submission.types';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import CodeEditor from '../../components/shared/CodeEditor';
-import { ArrowLeft, Play, Code } from 'lucide-react';
+import { ArrowLeft, Play, Code, Zap, HardDrive } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const SubmitCode: React.FC = () => {
@@ -72,81 +72,98 @@ const SubmitCode: React.FC = () => {
 
   if (challengeLoading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400"></div>
       </div>
     );
   }
 
   if (!challenge) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Challenge not found</p>
-        <Button onClick={() => navigate('/challenges')} className="mt-4">
-          Back to Challenges
-        </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-slate-400 mb-4">Challenge not found</p>
+          <Button onClick={() => navigate('/challenges')}>
+            Back to Challenges
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div className="px-4 py-6 sm:px-0">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button
-              variant="secondary"
-              size="sm"
+            <button
               onClick={() => navigate('/challenges')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-colors"
             >
-              <ArrowLeft size={16} />
-              Back
-            </Button>
+              <ArrowLeft size={20} />
+              <span>Back</span>
+            </button>
+            <div className="h-8 w-px bg-slate-700"></div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{challenge.title}</h1>
-              <p className="text-gray-600">Submit your solution</p>
+              <h1 className="text-2xl font-bold text-white">{challenge.title}</h1>
+              <p className="text-slate-400">Submit your solution</p>
             </div>
           </div>
         </div>
 
-        {/* Challenge Info */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-2">
-              <Code size={16} className="text-gray-500" />
-              <span className="text-sm text-gray-600">Difficulty:</span>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                challenge.difficulty === 'EASY' ? 'bg-green-100 text-green-800' :
-                challenge.difficulty === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {challenge.difficulty}
-              </span>
+        {/* Challenge Info Card */}
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-slate-700/50 rounded-lg">
+                <Code size={20} className="text-cyan-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-400">Difficulty</p>
+                <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold ${
+                  challenge.difficulty === 'EASY' 
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                    : challenge.difficulty === 'MEDIUM' 
+                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
+                    : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                }`}>
+                  {challenge.difficulty}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Time Limit:</span>
-              <span className="font-medium">{challenge.timeLimit}ms</span>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-slate-700/50 rounded-lg">
+                <Zap size={20} className="text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-400">Time Limit</p>
+                <p className="text-white font-semibold">{challenge.timeLimit}ms</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Memory Limit:</span>
-              <span className="font-medium">{challenge.memoryLimit}MB</span>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-slate-700/50 rounded-lg">
+                <HardDrive size={20} className="text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm text-slate-400">Memory Limit</p>
+                <p className="text-white font-semibold">{challenge.memoryLimit}MB</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Code Submission Form */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
           <div className="mb-6">
-            <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="language" className="block text-sm font-medium text-slate-300 mb-2">
               Programming Language
             </label>
             <select
               id="language"
               value={language}
               onChange={(e) => setLanguage(e.target.value as typeof language)}
-              className="input max-w-xs"
+              className="w-full max-w-xs px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
             >
               <option value="python">Python</option>
               <option value="java">Java</option>
@@ -156,26 +173,37 @@ const SubmitCode: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Your Code
             </label>
-            <CodeEditor
-              value={code}
-              onChange={(value) => setCode(value || '')}
-              language={language}
-              height="500px"
-            />
+            <div className="rounded-lg overflow-hidden border border-slate-600">
+              <CodeEditor
+                value={code}
+                onChange={(value) => setCode(value || '')}
+                language={language}
+                height="500px"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end">
-            <Button
+            <button
               onClick={handleSubmit}
-              isLoading={loading}
-              className="flex items-center gap-2"
+              disabled={loading}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Play size={16} />
-              Submit Solution
-            </Button>
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <>
+                  <Play size={18} />
+                  <span>Submit Solution</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

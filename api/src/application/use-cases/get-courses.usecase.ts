@@ -32,9 +32,11 @@ export class GetCoursesUseCase {
     let courses;
 
     if (getCoursesDto?.userId && getCoursesDto?.role === 'STUDENT') {
+      // Students only see courses they are enrolled in
       courses = await this.courseRepository.findCoursesByStudentId(getCoursesDto.userId);
-    } else if (getCoursesDto?.userId && getCoursesDto?.role === 'ADMIN') {
-      courses = await this.courseRepository.findCoursesByProfessorId(getCoursesDto.userId);
+    } else if (getCoursesDto?.role === 'ADMIN') {
+      // Admins see ALL courses to manage them
+      courses = await this.courseRepository.findAll();
     } else {
       courses = await this.courseRepository.findAll();
     }

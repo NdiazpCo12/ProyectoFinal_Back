@@ -1,6 +1,7 @@
 import axiosInstance from './axios';
 import {
   Course,
+  CourseWithDetails,
   CreateCourseRequest,
   EnrollStudentDto,
   AssignProfessorDto,
@@ -11,6 +12,12 @@ export const coursesApi = {
   // Get courses (filtered by user role)
   getCourses: async (): Promise<Course[]> => {
     const response = await axiosInstance.get<Course[]>('/courses');
+    return response.data;
+  },
+
+  // Get course by ID with full details
+  getCourseById: async (courseId: string): Promise<CourseWithDetails> => {
+    const response = await axiosInstance.get<CourseWithDetails>(`/courses/${courseId}`);
     return response.data;
   },
 

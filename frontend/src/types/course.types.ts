@@ -6,9 +6,15 @@ export interface Course {
   group: number;
   createdAt: string;
   updatedAt: string;
-  professors?: CourseProfessor[];
-  enrollments?: CourseEnrollment[];
-  courseChallenges?: CourseChallenge[];
+  studentCount?: number;
+  professorCount?: number;
+  challengeCount?: number;
+}
+
+export interface CourseWithDetails extends Course {
+  professors: CourseProfessor[];
+  enrollments: CourseEnrollment[];
+  courseChallenges: CourseChallenge[];
 }
 
 export interface CourseProfessor {
@@ -54,11 +60,11 @@ export interface CreateCourseRequest {
 }
 
 export interface EnrollStudentDto {
-  userId: string;
+  studentId: string;
 }
 
 export interface AssignProfessorDto {
-  userId: string;
+  professorId: string;
 }
 
 export interface AssignChallengeToCourseDto {

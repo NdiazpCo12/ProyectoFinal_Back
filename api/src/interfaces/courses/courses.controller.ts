@@ -9,6 +9,7 @@ import {
   Request,
   ValidationPipe,
   Inject,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateCourseUseCase } from '../../application/use-cases/create-course.usecase';
 import { EnrollStudentUseCase } from '../../application/use-cases/enroll-student.usecase';
@@ -18,6 +19,7 @@ import { GetCoursesUseCase } from '../../application/use-cases/get-courses.useca
 import { GetCourseChallengesUseCase } from '../../application/use-cases/get-course-challenges.usecase';
 import { JwtAuthGuard } from '../../infrastructure/security/jwt-auth.guard';
 import { AdminGuard } from '../../infrastructure/security/admin.guard';
+import { PrismaService } from '../../infrastructure/database/prisma.service';
 import { CreateCourseDto } from '../dto/create-course.dto';
 import { EnrollStudentDto } from '../dto/enroll-student.dto';
 import { AssignProfessorDto } from '../dto/assign-professor.dto';
@@ -43,6 +45,8 @@ export class CoursesController {
 
     @Inject(AssignChallengeToCourseUseCase)
     private readonly assignChallengeToCourseUseCase: AssignChallengeToCourseUseCase,
+
+    private readonly prisma: PrismaService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -52,6 +56,43 @@ export class CoursesController {
       userId: req.user.id,
       role: req.user.role,
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getCourseById(@Param('id') courseId: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        enrollments: {
+          include: {
+            user: {
+              select: { id: true, email: true, role: true },
+            },
+          },
+        },
+        professors: {
+          include: {
+            user: {
+              select: { id: true, email: true, role: true },
+            },
+          },
+        },
+        courseChallenges: {
+          include: {
+            challenge: {
+              select: { id: true, title: true, difficulty: true, status: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    return course;
   }
 
   @UseGuards(JwtAuthGuard)

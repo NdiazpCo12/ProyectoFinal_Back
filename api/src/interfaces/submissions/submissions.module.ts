@@ -4,6 +4,7 @@ import { SubmissionsController } from './submissions.controller';
 // Casos de uso (application layer)
 import { CreateSubmissionUseCase } from '../../application/use-cases/create-submission.usecase';
 import { GetSubmissionUseCase } from '../../application/use-cases/get-submission-status.usecase';
+import { GetUserSubmissionsUseCase } from '../../application/use-cases/get-user-submissions.usecase';
 
 // Infraestructura (repositories, redis)
 import { SubmissionRepository } from '../../infrastructure/database/submission.repository';
@@ -18,6 +19,7 @@ import { JobQueueAdapter } from '../../infrastructure/redis/jobqueue.adapter';
     // Casos de uso
     CreateSubmissionUseCase,
     GetSubmissionUseCase,
+    GetUserSubmissionsUseCase,
 
     // Infraestructura
     SubmissionRepository,

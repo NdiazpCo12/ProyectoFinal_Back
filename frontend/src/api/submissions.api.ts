@@ -12,12 +12,8 @@ export const submissionsApi = {
     return response.data;
   },
 
-  // Note: The backend doesn't have an endpoint to list submissions yet
-  // This would need to be added to the backend first
   getUserSubmissions: async (): Promise<Submission[]> => {
-    // Placeholder - backend needs to implement this endpoint
-    // const response = await axiosInstance.get<Submission[]>('/submissions');
-    // return response.data;
-    return [];
+    const response = await axiosInstance.get<Submission[]>('/submissions');
+    return response.data;
   },
 };

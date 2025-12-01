@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
 import { coursesApi } from '../../api/courses.api';
+import { ArrowLeft, BookOpen, Hash, Calendar, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CourseForm: React.FC = () => {
@@ -22,7 +22,6 @@ const CourseForm: React.FC = () => {
       ...prev,
       [name]: name === 'group' ? parseInt(value) || 1 : value,
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -35,19 +34,19 @@ const CourseForm: React.FC = () => {
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Course name is required';
+      newErrors.name = 'El nombre del curso es requerido';
     }
 
     if (!formData.nrc.trim()) {
-      newErrors.nrc = 'NRC is required';
+      newErrors.nrc = 'El NRC es requerido';
     }
 
     if (!formData.period.trim()) {
-      newErrors.period = 'Period is required';
+      newErrors.period = 'El período es requerido';
     }
 
     if (formData.group < 1) {
-      newErrors.group = 'Group must be at least 1';
+      newErrors.group = 'El grupo debe ser al menos 1';
     }
 
     setErrors(newErrors);
@@ -65,11 +64,11 @@ const CourseForm: React.FC = () => {
 
     try {
       await coursesApi.createCourse(formData);
-      toast.success('Course created successfully!');
+      toast.success('¡Curso creado exitosamente!');
       navigate('/courses');
     } catch (error: any) {
       console.error('Error creating course:', error);
-      const message = error.response?.data?.message || 'Failed to create course';
+      const message = error.response?.data?.message || 'Error al crear el curso';
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -77,74 +76,139 @@ const CourseForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div className="px-4 py-6 sm:px-0">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Create New Course</h1>
-          <p className="mt-2 text-gray-600">Add a new course to the system</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => navigate('/courses')}
+            className="flex items-center text-slate-400 hover:text-cyan-400 transition-colors mb-4"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Volver a Cursos
+          </button>
+
+          <div className="flex items-center">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mr-4">
+              <BookOpen className="w-6 h-6 text-purple-400" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white">Crear Nuevo Curso</h1>
+              <p className="text-slate-400">Añade un nuevo curso al sistema</p>
+            </div>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Course Name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                error={errors.name}
-                placeholder="e.g., Programming Fundamentals"
-              />
-
-              <Input
-                label="NRC"
-                name="nrc"
-                type="text"
-                required
-                value={formData.nrc}
-                onChange={handleChange}
-                error={errors.nrc}
-                placeholder="e.g., 12345"
-              />
+        {/* Form */}
+        <form onSubmit={handleSubmit}>
+          <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6 space-y-6">
+            {/* Course Name */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Nombre del Curso
+              </label>
+              <div className="relative">
+                <BookOpen className="absolute left-3 top-3 h-5 w-5 text-slate-500" />
+                <input
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`w-full bg-slate-700/50 border ${errors.name ? 'border-red-500' : 'border-slate-600'} text-white rounded-lg pl-10 pr-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-slate-500`}
+                  placeholder="ej: Estructuras de Datos"
+                />
+              </div>
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-400">{errors.name}</p>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <Input
-                label="Period"
-                name="period"
-                type="text"
-                required
-                value={formData.period}
-                onChange={handleChange}
-                error={errors.period}
-                placeholder="e.g., 2025-1"
-              />
+            {/* NRC */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                NRC
+              </label>
+              <div className="relative">
+                <Hash className="absolute left-3 top-3 h-5 w-5 text-slate-500" />
+                <input
+                  name="nrc"
+                  type="text"
+                  required
+                  value={formData.nrc}
+                  onChange={handleChange}
+                  className={`w-full bg-slate-700/50 border ${errors.nrc ? 'border-red-500' : 'border-slate-600'} text-white rounded-lg pl-10 pr-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-slate-500`}
+                  placeholder="ej: 12345"
+                />
+              </div>
+              {errors.nrc && (
+                <p className="mt-1 text-sm text-red-400">{errors.nrc}</p>
+              )}
+            </div>
 
-              <Input
-                label="Group"
-                name="group"
-                type="number"
-                required
-                min="1"
-                value={formData.group}
-                onChange={handleChange}
-                error={errors.group}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Period */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Período
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3 h-5 w-5 text-slate-500" />
+                  <input
+                    name="period"
+                    type="text"
+                    required
+                    value={formData.period}
+                    onChange={handleChange}
+                    className={`w-full bg-slate-700/50 border ${errors.period ? 'border-red-500' : 'border-slate-600'} text-white rounded-lg pl-10 pr-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-slate-500`}
+                    placeholder="ej: 2025-1"
+                  />
+                </div>
+                {errors.period && (
+                  <p className="mt-1 text-sm text-red-400">{errors.period}</p>
+                )}
+              </div>
+
+              {/* Group */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Grupo
+                </label>
+                <div className="relative">
+                  <Users className="absolute left-3 top-3 h-5 w-5 text-slate-500" />
+                  <input
+                    name="group"
+                    type="number"
+                    required
+                    min="1"
+                    value={formData.group}
+                    onChange={handleChange}
+                    className={`w-full bg-slate-700/50 border ${errors.group ? 'border-red-500' : 'border-slate-600'} text-white rounded-lg pl-10 pr-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-slate-500`}
+                  />
+                </div>
+                {errors.group && (
+                  <p className="mt-1 text-sm text-red-400">{errors.group}</p>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-4">
+          {/* Actions */}
+          <div className="flex justify-end gap-4 mt-6">
             <Button
               type="button"
               variant="secondary"
               onClick={() => navigate('/courses')}
+              className="bg-slate-700/50 border-slate-600 hover:bg-slate-600 text-slate-300"
             >
-              Cancel
+              Cancelar
             </Button>
-            <Button type="submit" isLoading={isSubmitting}>
-              Create Course
+            <Button 
+              type="submit" 
+              isLoading={isSubmitting}
+              className="bg-purple-500 hover:bg-purple-600"
+            >
+              Crear Curso
             </Button>
           </div>
         </form>

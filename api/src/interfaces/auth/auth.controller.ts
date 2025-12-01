@@ -1,7 +1,9 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
+  Query,
   UseGuards,
   Request,
   ValidationPipe,
@@ -10,6 +12,8 @@ import {
 import { LoginUseCase } from '../../application/use-cases/login.usecase';
 import { RegisterUseCase } from '../../application/use-cases/register.usecase';
 import { JwtAuthGuard } from '../../infrastructure/security/jwt-auth.guard';
+import { AdminGuard } from '../../infrastructure/security/admin.guard';
+import { PrismaService } from '../../infrastructure/database/prisma.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 
@@ -21,6 +25,8 @@ export class AuthController {
 
     @Inject(RegisterUseCase)
     private readonly registerUseCase: RegisterUseCase,
+
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post('login')
@@ -41,5 +47,22 @@ export class AuthController {
       email: req.user.email,
       role: req.user.role,
     };
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('users')
+  async getUsers(@Query('role') role?: string) {
+    const where = role ? { role: role as any } : {};
+    const users = await this.prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: { email: 'asc' },
+    });
+    return users;
   }
 }

@@ -2,9 +2,9 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache coreutils
+RUN apk add --no-cache coreutils dos2unix
 
 COPY runner.sh /runner.sh
-RUN chmod +x /runner.sh
+RUN dos2unix /runner.sh && chmod +x /runner.sh
 
 ENTRYPOINT ["/runner.sh"]

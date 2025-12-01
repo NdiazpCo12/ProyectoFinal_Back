@@ -4,7 +4,7 @@ import { submissionsApi } from '../../api/submissions.api';
 import { Submission, TestCaseResult } from '../../types/submission.types';
 import { Button } from '../../components/ui/Button';
 import CodeEditor from '../../components/shared/CodeEditor';
-import { ArrowLeft, CheckCircle, XCircle, Clock, AlertTriangle, Code } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Clock, AlertTriangle, Code, Trophy, Timer } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const SubmissionDetail: React.FC = () => {
@@ -68,160 +68,227 @@ const SubmissionDetail: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'ACCEPTED':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-emerald-400" />;
       case 'WRONG_ANSWER':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-rose-400" />;
       case 'TIME_LIMIT_EXCEEDED':
-        return <Clock className="h-5 w-5 text-yellow-500" />;
+        return <Clock className="h-5 w-5 text-amber-400" />;
       case 'RUNTIME_ERROR':
-        return <AlertTriangle className="h-5 w-5 text-red-500" />;
+        return <AlertTriangle className="h-5 w-5 text-rose-400" />;
       case 'COMPILATION_ERROR':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-rose-400" />;
       case 'RUNNING':
-        return <div className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>;
+        return <div className="h-5 w-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>;
       case 'QUEUED':
-        return <Clock className="h-5 w-5 text-gray-500" />;
+        return <Clock className="h-5 w-5 text-slate-400" />;
       default:
-        return <Clock className="h-5 w-5 text-gray-500" />;
+        return <Clock className="h-5 w-5 text-slate-400" />;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyle = (status: string) => {
     switch (status) {
       case 'ACCEPTED':
-        return 'text-green-700 bg-green-100';
+        return 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30';
       case 'WRONG_ANSWER':
-        return 'text-red-700 bg-red-100';
+        return 'text-rose-400 bg-rose-500/20 border-rose-500/30';
       case 'TIME_LIMIT_EXCEEDED':
-        return 'text-yellow-700 bg-yellow-100';
+        return 'text-amber-400 bg-amber-500/20 border-amber-500/30';
       case 'RUNTIME_ERROR':
-        return 'text-red-700 bg-red-100';
+        return 'text-rose-400 bg-rose-500/20 border-rose-500/30';
       case 'COMPILATION_ERROR':
-        return 'text-red-700 bg-red-100';
+        return 'text-rose-400 bg-rose-500/20 border-rose-500/30';
       case 'RUNNING':
-        return 'text-blue-700 bg-blue-100';
+        return 'text-cyan-400 bg-cyan-500/20 border-cyan-500/30';
       case 'QUEUED':
-        return 'text-gray-700 bg-gray-100';
+        return 'text-slate-400 bg-slate-500/20 border-slate-500/30';
       default:
-        return 'text-gray-700 bg-gray-100';
+        return 'text-slate-400 bg-slate-500/20 border-slate-500/30';
+    }
+  };
+
+  const getStatusBgStyle = (status: string) => {
+    switch (status) {
+      case 'ACCEPTED':
+        return 'bg-emerald-500/10 border-emerald-500/20';
+      case 'WRONG_ANSWER':
+      case 'RUNTIME_ERROR':
+      case 'COMPILATION_ERROR':
+        return 'bg-rose-500/10 border-rose-500/20';
+      case 'TIME_LIMIT_EXCEEDED':
+        return 'bg-amber-500/10 border-amber-500/20';
+      case 'RUNNING':
+        return 'bg-cyan-500/10 border-cyan-500/20';
+      default:
+        return 'bg-slate-500/10 border-slate-500/20';
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400"></div>
       </div>
     );
   }
 
   if (!submission) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Submission not found</p>
-        <Button onClick={() => navigate('/challenges')} className="mt-4">
-          Back to Challenges
-        </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-slate-400 mb-4">Submission not found</p>
+          <Button onClick={() => navigate('/challenges')}>
+            Back to Challenges
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div className="px-4 py-6 sm:px-0">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Button
-              variant="secondary"
-              size="sm"
+            <button
               onClick={() => navigate('/challenges')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-colors"
             >
-              <ArrowLeft size={16} />
-              Back
-            </Button>
+              <ArrowLeft size={20} />
+              <span>Back</span>
+            </button>
+            <div className="h-8 w-px bg-slate-700"></div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Submission Details</h1>
-              <p className="text-gray-600">ID: {submission.id}</p>
+              <h1 className="text-2xl font-bold text-white">Submission Details</h1>
+              <p className="text-slate-400 text-sm font-mono">ID: {submission.id}</p>
             </div>
           </div>
         </div>
 
-        {/* Status Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-2 mb-2">
+        {/* Status Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Status Card */}
+          <div className={`rounded-xl border p-5 ${getStatusBgStyle(submission.status)}`}>
+            <div className="flex items-center gap-3 mb-3">
               {getStatusIcon(submission.status)}
-              <span className="font-medium text-gray-900">Status</span>
+              <span className="font-medium text-slate-300">Status</span>
             </div>
-            <span className={`px-2 py-1 rounded text-sm font-medium ${getStatusColor(submission.status)}`}>
+            <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getStatusStyle(submission.status)}`}>
               {submission.status.replace('_', ' ')}
             </span>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Code size={16} className="text-gray-500" />
-              <span className="font-medium text-gray-900">Language</span>
+          {/* Language Card */}
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <Code size={20} className="text-purple-400" />
+              <span className="font-medium text-slate-300">Language</span>
             </div>
-            <span className="text-gray-700 capitalize">{submission.language}</span>
+            <span className="text-white font-semibold capitalize">{submission.language}</span>
           </div>
 
+          {/* Score Card */}
           {submission.result && (
-            <>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle size={16} className="text-green-500" />
-                  <span className="font-medium text-gray-900">Score</span>
-                </div>
-                <span className="text-2xl font-bold text-green-600">{submission.result.score}%</span>
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <Trophy size={20} className="text-amber-400" />
+                <span className="font-medium text-slate-300">Score</span>
               </div>
+              <span className={`text-3xl font-bold ${
+                submission.result.score === 100 
+                  ? 'text-emerald-400' 
+                  : submission.result.score > 0 
+                  ? 'text-amber-400' 
+                  : 'text-rose-400'
+              }`}>
+                {submission.result.score}%
+              </span>
+            </div>
+          )}
 
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock size={16} className="text-blue-500" />
-                  <span className="font-medium text-gray-900">Time</span>
-                </div>
-                <span className="text-gray-700">{submission.result.timeMsTotal}ms</span>
+          {/* Time Card */}
+          {submission.result && (
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <Timer size={20} className="text-cyan-400" />
+                <span className="font-medium text-slate-300">Total Time</span>
               </div>
-            </>
+              <span className="text-white font-semibold">{submission.result.timeMsTotal}ms</span>
+            </div>
           )}
         </div>
 
         {/* Test Cases Results */}
         {submission.result && submission.result.cases.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Test Cases</h2>
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6 mb-6">
+            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <CheckCircle size={20} className="text-cyan-400" />
+              Test Cases
+            </h2>
             <div className="space-y-3">
-              {submission.result.cases.map((testCase: TestCaseResult) => (
-                <div key={testCase.caseId} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+              {submission.result.cases.map((testCase: TestCaseResult, index: number) => (
+                <div 
+                  key={testCase.caseId} 
+                  className={`flex items-center justify-between p-4 rounded-lg border ${
+                    testCase.status === 'OK' 
+                      ? 'bg-emerald-500/10 border-emerald-500/20' 
+                      : 'bg-rose-500/10 border-rose-500/20'
+                  }`}
+                >
                   <div className="flex items-center gap-3">
-                    {getStatusIcon(testCase.status)}
-                    <span className="font-medium">Test Case {testCase.caseId}</span>
+                    {testCase.status === 'OK' ? (
+                      <CheckCircle size={20} className="text-emerald-400" />
+                    ) : (
+                      <XCircle size={20} className="text-rose-400" />
+                    )}
+                    <span className="font-medium text-white">Test Case {index + 1}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(testCase.status)}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                      testCase.status === 'OK'
+                        ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30'
+                        : 'text-rose-400 bg-rose-500/20 border-rose-500/30'
+                    }`}>
                       {testCase.status}
                     </span>
-                    <span className="text-sm text-gray-600">{testCase.timeMs}ms</span>
+                    <span className="text-sm text-slate-400 font-mono">{testCase.timeMs}ms</span>
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Error Message if any */}
+            {submission.result.cases.some((tc: TestCaseResult) => tc.error) && (
+              <div className="mt-4 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                <h3 className="text-sm font-semibold text-rose-400 mb-2">Error Details</h3>
+                {submission.result.cases
+                  .filter((tc: TestCaseResult) => tc.error)
+                  .map((tc: TestCaseResult, idx: number) => (
+                    <pre key={idx} className="text-sm text-rose-300 font-mono whitespace-pre-wrap">
+                      {tc.error}
+                    </pre>
+                  ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* Code Display */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Submitted Code</h2>
-          <CodeEditor
-            value={submission.code}
-            onChange={() => {}} // Read-only
-            language={submission.language}
-            height="400px"
-            readOnly={true}
-          />
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Code size={20} className="text-cyan-400" />
+            Submitted Code
+          </h2>
+          <div className="rounded-lg overflow-hidden border border-slate-600">
+            <CodeEditor
+              value={submission.code}
+              onChange={() => {}} // Read-only
+              language={submission.language}
+              height="400px"
+              readOnly={true}
+            />
+          </div>
         </div>
       </div>
     </div>
